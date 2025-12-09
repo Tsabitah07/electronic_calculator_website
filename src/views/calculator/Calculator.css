@@ -1,0 +1,57 @@
+body {
+    font-family: Arial, sans-serif;
+    background: #efefef;
+    padding: 20px;
+}
+
+.kalkulator {
+    background: #e5e5e5;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.item-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+    background: #fff;
+    padding: 10px;
+    border-radius: 8px;
+    align-items: center;
+}
+
+label {
+    font-size: 13px;
+}
+
+select,
+input {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    min-width: 110px;
+}
+
+.btn {
+    background: #fff;
+    border: 1px solid #aaa;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.btn:hover {
+    background: #ddd;
+}
+
+.center {
+    text-align: center;
+}
+
+.extra {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
