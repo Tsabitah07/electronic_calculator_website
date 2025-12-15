@@ -1,43 +1,46 @@
-// src/views/calculator/Calculator.jsx
-import useCalculatorLogic from "../../service/electricity.js";
+import useCalculatorLogic from "../../service/data";
+import SummaryData from "../result/Result";
+import "./Calculator.css";
 
-export default function Views() {
+export default function Calculator() {
     const {
         jenisRumah,
         daftarRumah,
         electronicName,
         items,
+        result,
+        loading,
         handleRumah,
         updateAlat,
         updateType,
         updateValue,
-        tambahItem
+        tambahItem,
+        hitungTotal,
     } = useCalculatorLogic();
 
     return (
         <div className="container">
             <div className="kalkulator">
-                {/* Rumah */}
                 <div className="item-row">
                     <label>Jenis Rumah</label>
                     <select value={jenisRumah} onChange={handleRumah}>
                         <option value="">-- Pilih Rumah --</option>
-                        {daftarRumah.map((rumah) => (
-                            <option key={rumah.id} value={rumah.id}>
-                                {rumah.name} - {rumah.kwh_watt} VA
+                        {daftarRumah.map((r) => (
+                            <option key={r.id} value={r.id}>
+                                {r.name} - {r.kwh_watt} VA
                             </option>
                         ))}
                     </select>
                 </div>
 
-                {/* Loop item */}
                 {items.map((item, i) => (
                     <div className="item-row" key={i}>
-                        {/* Alat */}
                         <label>Alat</label>
                         <select
                             value={item.alat_id}
-                            onChange={(e) => updateAlat(i, e.target.value)}
+                            onChange={(e) =>
+                                updateAlat(i, e.target.value)
+                            }
                         >
                             <option value="">-- Pilih --</option>
                             {electronicName.map((e) => (
@@ -47,7 +50,6 @@ export default function Views() {
                             ))}
                         </select>
 
-                        {/* Jumlah */}
                         <label>Jumlah</label>
                         <input
                             type="number"
@@ -58,8 +60,7 @@ export default function Views() {
                             }
                         />
 
-                        {/* Waktu */}
-                        <label>Waktu</label>
+                        <label>Waktu (jam)</label>
                         <input
                             type="number"
                             min="1"
@@ -69,11 +70,12 @@ export default function Views() {
                             }
                         />
 
-                        {/* Type berdasarkan API */}
                         <label>Tipe</label>
                         <select
                             value={item.type_id}
-                            onChange={(e) => updateType(i, e.target.value)}
+                            onChange={(e) =>
+                                updateType(i, e.target.value)
+                            }
                         >
                             <option value="">-- Pilih Tipe --</option>
                             {item.types.map((t) => (
@@ -91,8 +93,12 @@ export default function Views() {
             </div>
 
             <div className="center">
-                <button className="btn">Hitung Total</button>
+                <button className="btn" onClick={hitungTotal}>
+                    {loading ? "Menghitung..." : "Hitung Total"}
+                </button>
             </div>
+
+            {result && <SummaryData data={result} />}
         </div>
     );
 }

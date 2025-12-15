@@ -1,25 +1,26 @@
-// src/service/electricity.js
 import { useState, useEffect } from "react";
 
 export default function useCalculatorLogic() {
     const [jenisRumah, setJenisRumah] = useState("");
     const [daftarRumah, setDaftarRumah] = useState([]);
 
-    const [electronicName, setElectronicName] = useState([]); // dari /electronic-name
-    const [electronicData, setElectronicData] = useState([]); // dari /electronic-data
+    const [electronicName, setElectronicName] = useState([]);
+    const [electronicData, setElectronicData] = useState([]);
 
     const [items, setItems] = useState([
         {
-            alat: "",
             alat_id: "",
             jumlah: 1,
             waktu: 1,
             type_id: "",
-            types: [], // list data hasil filter
-        }
+            types: [],
+        },
     ]);
 
-    // Fetch electronic-name + electronic-data
+    const [result, setResult] = useState(null);
+    const [loading, setLoading] = useState(false);
+
+    // FETCH ELECTRONIC NAME + DATA
     useEffect(() => {
         fetch("https://electronic-calculator-api.vercel.app/electronic-name")
             .then((r) => r.json())
@@ -30,24 +31,22 @@ export default function useCalculatorLogic() {
             .then((j) => setElectronicData(j.data || []));
     }, []);
 
-    // Fetch rumah (existing)
+    // FETCH RUMAH
     useEffect(() => {
         fetch("https://electronic-calculator-api.vercel.app/electricity")
-            .then((res) => res.json())
-            .then((json) => setDaftarRumah(json.data || []))
-            .catch((err) => console.error("Gagal fetch:", err));
+            .then((r) => r.json())
+            .then((j) => setDaftarRumah(j.data || []));
     }, []);
 
     const handleRumah = (e) => {
         setJenisRumah(e.target.value);
     };
 
-    // Update alat (electronic-name)
     const updateAlat = (index, alatId) => {
         const newItems = [...items];
-
-        // filter type berdasarkan name_id
-        const filteredTypes = electronicData.filter((d) => d.name_id == alatId);
+        const filteredTypes = electronicData.filter(
+            (d) => d.name_id == alatId
+        );
 
         newItems[index] = {
             ...newItems[index],
@@ -59,7 +58,6 @@ export default function useCalculatorLogic() {
         setItems(newItems);
     };
 
-    // Update type (electronic-data)
     const updateType = (index, typeId) => {
         const newItems = [...items];
         newItems[index].type_id = typeId;
@@ -76,14 +74,48 @@ export default function useCalculatorLogic() {
         setItems([
             ...items,
             {
-                alat: "",
                 alat_id: "",
                 jumlah: 1,
                 waktu: 1,
                 type_id: "",
                 types: [],
-            }
+            },
         ]);
+    };
+
+    const hitungTotal = async () => {
+        if (!jenisRumah) return alert("Pilih jenis rumah dulu");
+
+        setLoading(true);
+
+        const payload = {
+            items: items.map((item) => ({
+                electricity_id: Number(jenisRumah),
+                electronic_name_id: Number(item.alat_id),
+                electronic_data_id: Number(item.type_id),
+                devices_used: Number(item.jumlah),
+                hours_used: Number(item.waktu),
+            })),
+        };
+
+        try {
+            const res = await fetch(
+                "https://electronic-calculator-api.vercel.app/calculator/bulk",
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                }
+            );
+
+            const json = await res.json();
+            setResult(json);
+        } catch (e) {
+            alert("Gagal menghitung");
+            console.error(e);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return {
@@ -91,10 +123,13 @@ export default function useCalculatorLogic() {
         daftarRumah,
         electronicName,
         items,
+        result,
+        loading,
         handleRumah,
         updateAlat,
         updateType,
         updateValue,
         tambahItem,
+        hitungTotal,
     };
 }
